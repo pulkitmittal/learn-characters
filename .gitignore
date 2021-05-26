@@ -1,0 +1,5 @@
+node_modules
+public/build
+.img_bk
+
+.DS_Store
