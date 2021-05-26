@@ -192,7 +192,7 @@
       </div>
       <button on:click={reset}>Reset History</button>
     {:else}
-      <p>Focus this window and press any key</p>
+      <div class="instructions">Focus this window and press any key</div>
     {/if}
   </section>
 
@@ -233,5 +233,10 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+  }
+
+  div.instructions {
+    font-size: 2em;
+    padding: 140px 0;
   }
 </style>
