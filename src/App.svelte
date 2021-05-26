@@ -57,7 +57,51 @@
         : /^[a-zA-Z0-9]$/;
   }
 
+  // speech
   const synth = window.speechSynthesis;
+  let shouldSpeak = true;
+  let speechVoice: SpeechSynthesisVoice | null = null;
+  let speechVoices: SpeechSynthesisVoice[] = [];
+  setTimeout(() => {
+    speechVoices = synth.getVoices();
+    const speechVoiceLang = JSON.parse(
+      localStorage.getItem('alphabets_speech_voice')
+    );
+
+    if (speechVoiceLang) {
+      shouldSpeak = speechVoiceLang.enabled;
+      const foundSpeechVoice = speechVoices.find(
+        (s) => s.lang === speechVoiceLang.lang
+      );
+      if (foundSpeechVoice) {
+        speechVoice = foundSpeechVoice;
+      }
+    }
+
+    speechVoice = speechVoice || speechVoices.find((s) => s.default);
+    shouldSpeak = shouldSpeak ?? true;
+  }, 500);
+
+  function speakText(text: string) {
+    if (speechVoice && shouldSpeak) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.voice = speechVoice;
+      synth.speak(utterance);
+    }
+  }
+
+  $: {
+    if (speechVoice) {
+      localStorage.setItem(
+        'alphabets_speech_voice',
+        JSON.stringify({
+          lang: speechVoice.lang,
+          enabled: shouldSpeak,
+        })
+      );
+    }
+  }
+
   let pressedKeys = [];
   let lastPressedKey: string;
   let selectedImageColor: string;
@@ -89,14 +133,14 @@
       }
       pressedKeys = [lastPressedKey, ...pressedKeys];
     }
-    synth.speak(new SpeechSynthesisUtterance(lastPressedKey));
+    speakText(lastPressedKey);
     localStorage.setItem('alphabets_keys', JSON.stringify(pressedKeys));
     localStorage.setItem('alphabets_last_key', lastPressedKey);
   }
 
   function setKey(k: string) {
     lastPressedKey = k;
-    synth.speak(new SpeechSynthesisUtterance(lastPressedKey));
+    speakText(lastPressedKey);
     localStorage.setItem('alphabets_last_key', lastPressedKey);
   }
 
@@ -108,10 +152,6 @@
     pressedKeys = [...pressedKeys];
     localStorage.setItem('alphabets_last_key', lastPressedKey);
     localStorage.setItem('alphabets_keys', JSON.stringify(pressedKeys));
-  }
-
-  function speakText(text: string) {
-    synth.speak(new SpeechSynthesisUtterance(text));
   }
 
   function reset() {
@@ -169,6 +209,19 @@
 
   <section>
     {#if pressedKeys.length > 0}
+      <div class="flex voice">
+        <label>
+          <input type="checkbox" bind:checked={shouldSpeak} />
+          Should Speak
+        </label>
+        <select bind:value={speechVoice}>
+          {#each speechVoices as voice}
+            <option value={voice}>
+              {voice.name}
+            </option>
+          {/each}
+        </select>
+      </div>
       {#if lastPressedKey}
         <div class="showcase flex">
           <Char key={lastPressedKey} color={selectedImageColor} />
@@ -213,6 +266,10 @@
     margin: 0 auto;
     min-width: 320px;
     max-width: 1280px;
+  }
+
+  div.voice select {
+    margin-left: 1em;
   }
 
   div.checkboxes {
