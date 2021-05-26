@@ -79,7 +79,7 @@ Then, from within your project folder:
 
 ```bash
 npm run build
-surge public learn-alphabets.surge.sh
+surge public learn-characters.surge.sh
 ```
 
 ## TODO

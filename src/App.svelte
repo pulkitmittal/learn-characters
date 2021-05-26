@@ -70,20 +70,28 @@
   });
 
   function handleKeydown(event: KeyboardEvent) {
-    if (regex.test(event.key)) {
-      if (lastPressedKey !== event.key) {
-        lastPressedKey = event.key;
-        // remove key from last location and push it in front
-        const keyIndex = pressedKeys.indexOf(lastPressedKey);
-        if (keyIndex > -1) {
-          pressedKeys.splice(keyIndex, 1);
-        }
-        pressedKeys = [lastPressedKey, ...pressedKeys];
-      }
-      synth.speak(new SpeechSynthesisUtterance(lastPressedKey));
-      localStorage.setItem('alphabets_keys', JSON.stringify(pressedKeys));
-      localStorage.setItem('alphabets_last_key', lastPressedKey);
+    if (
+      !regex.test(event.key) ||
+      event.shiftKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.altKey
+    ) {
+      return;
     }
+
+    if (lastPressedKey !== event.key) {
+      lastPressedKey = event.key;
+      // remove key from last location and push it in front
+      const keyIndex = pressedKeys.indexOf(lastPressedKey);
+      if (keyIndex > -1) {
+        pressedKeys.splice(keyIndex, 1);
+      }
+      pressedKeys = [lastPressedKey, ...pressedKeys];
+    }
+    synth.speak(new SpeechSynthesisUtterance(lastPressedKey));
+    localStorage.setItem('alphabets_keys', JSON.stringify(pressedKeys));
+    localStorage.setItem('alphabets_last_key', lastPressedKey);
   }
 
   function setKey(k: string) {
@@ -117,7 +125,7 @@
 <svelte:window on:keydown={handleKeydown} />
 
 <main>
-  <h1>Key Checker!</h1>
+  <h1>Let's learn characters!</h1>
 
   <div class="flex checkboxes">
     <legend>Background:</legend>
@@ -187,6 +195,15 @@
       <p>Focus this window and press any key</p>
     {/if}
   </section>
+
+  <p>
+    Source code: <a
+      target="_blank"
+      href="https://github.com/pulkitmittal/learn-characters"
+    >
+      Github
+    </a>
+  </p>
 </main>
 
 <style>
