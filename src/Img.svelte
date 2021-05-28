@@ -7,6 +7,7 @@
   import { AllImages } from './all_images';
 
   export let key = '';
+  export let autoRotate = true;
 
   const dispatch = createEventDispatcher();
   const colorThief = new ColorThief();
@@ -29,9 +30,14 @@
     });
   });
 
-  function getColor() {
+  const getColor = () => {
     const img: HTMLImageElement = document.querySelector('img.char-image');
-    return new Promise<[number, number, number]>((resolve) => {
+    return new Promise<[number, number, number]>((resolve, reject) => {
+      if (!img) {
+        reject();
+        return;
+      }
+
       if (img.complete) {
         const color = colorThief.getColor(img);
         resolve(color);
@@ -44,9 +50,9 @@
         img.addEventListener('load', cc);
       }
     });
-  }
+  };
 
-  function prevImage() {
+  const prevImage = () => {
     let index = selectedKeyImageIndex;
     if (index === 0) {
       index = selectedKeyImages.length - 1;
@@ -55,9 +61,9 @@
     }
     selectedKeyImageIndex = index;
     setKeyImage();
-  }
+  };
 
-  function nextImage() {
+  const nextImage = () => {
     let index = selectedKeyImageIndex;
     if (index === selectedKeyImages.length - 1) {
       index = 0;
@@ -66,9 +72,9 @@
     }
     selectedKeyImageIndex = index;
     setKeyImage();
-  }
+  };
 
-  function setKeyImage() {
+  const setKeyImage = () => {
     selectedKeyImage = selectedKeyImages[selectedKeyImageIndex];
     if (selectedKeyImage) {
       tick()
@@ -77,20 +83,33 @@
           selectedImageColor = `rgb(${color})`;
           dispatch('speak', { text: selectedKeyImage.alt });
           dispatch('color', { color: selectedImageColor });
-        });
+        })
+        .catch(stopAutoRotate);
     }
-  }
+  };
+
+  let autoSelectNextImageInterval: any;
+  const startAutoRotate = (keyImages: KeyImage[]) => {
+    stopAutoRotate();
+    if (keyImages.length > 1) {
+      autoSelectNextImageInterval = setInterval(nextImage, 5000);
+    }
+  };
+  const stopAutoRotate = () => {
+    autoSelectNextImageInterval && clearInterval(autoSelectNextImageInterval);
+  };
 
   $: {
     const keyImages = images[key] || images[key.toUpperCase()];
     selectedKeyImages = keyImages?.length ? keyImages : [];
     selectedKeyImageIndex = 0;
     setKeyImage();
+    autoRotate && startAutoRotate(keyImages);
   }
 </script>
 
 {#if selectedKeyImage}
-  <div class="images">
+  <div class="images" class:has-arrows={selectedKeyImages.length > 1}>
     {#if selectedKeyImages.length > 1}
       <div class="prev" on:click={() => prevImage()}>&lt;</div>
     {/if}
@@ -119,21 +138,25 @@
 <style>
   div.images {
     display: flex;
-    margin-left: 32px;
-    /* border: 1px solid #f2f2f2; */
+    width: 320px;
+    max-width: 320px;
+  }
+  @media (max-width: 768px) {
+    div.images {
+      width: 50%;
+    }
   }
   div.image-wrapper {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 320px;
-    height: 320px;
   }
   div.image-wrapper img.char-image {
-    width: calc(100% - 56px);
-    max-height: calc(100% - 56px);
-    object-fit: contain;
+    width: calc(100% - 52px);
+  }
+  div.images.has-arrows div.image-wrapper img.char-image {
+    width: calc(100% - 8px);
   }
   div.image-wrapper div.text {
     font-size: 2em;

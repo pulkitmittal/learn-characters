@@ -3,163 +3,91 @@
   import Char from './Char.svelte';
   import Img from './Img.svelte';
   import Kbd from './Kbd.svelte';
+  import Speech from './Speech.svelte';
+  import BodyColor from './BodyColor.svelte';
+  import KeysListener from './KeysListener.svelte';
 
-  // body color
-  let bodyColor: any = localStorage.getItem('alphabets_body_color') || 'green';
-  $: {
-    document.body.classList.toggle('blue', bodyColor === 'blue');
-    document.body.classList.toggle('orange', bodyColor === 'orange');
-    document.body.classList.toggle('red', bodyColor === 'red');
-    document.body.classList.toggle('green', bodyColor === 'green');
-    localStorage.setItem('alphabets_body_color', bodyColor);
-  }
-
-  // listening to keys
-  let allowCapitalLetters = true,
-    allowSmallLetters = true,
-    allowNumbers = false;
-
-  let listeningTo = '';
   let regex = /^.*$/;
-
-  $: {
-    const allKeys = ['capital letters', 'small letters', 'numbers'];
-    const listeningToArr = [
-      allowCapitalLetters ? allKeys[0] : '',
-      allowSmallLetters ? allKeys[1] : '',
-      allowNumbers ? allKeys[2] : '',
-    ].filter((v) => !!v);
-
-    listeningTo =
-      listeningToArr.length === 0
-        ? `${allKeys.slice(0, -1).join(', ')} and ${allKeys.slice(-1)[0]}`
-        : listeningToArr.length > 1
-        ? `${listeningToArr.slice(0, -1).join(', ')} and ${
-            listeningToArr.slice(-1)[0]
-          }`
-        : listeningToArr.join('');
-
-    regex =
-      allowCapitalLetters && allowNumbers && allowSmallLetters
-        ? /^[a-zA-Z0-9]$/
-        : allowCapitalLetters && allowNumbers
-        ? /^[A-Z0-9]$/
-        : allowCapitalLetters && allowSmallLetters
-        ? /^[a-zA-Z]$/
-        : allowSmallLetters && allowNumbers
-        ? /^[a-z0-9]$/
-        : allowCapitalLetters
-        ? /^[A-Z]$/
-        : allowSmallLetters
-        ? /^[a-z]$/
-        : allowNumbers
-        ? /^[0-9]$/
-        : /^[a-zA-Z0-9]$/;
-  }
-
-  // speech
-  const synth = window.speechSynthesis;
-  let shouldSpeak = true;
-  let speechVoice: SpeechSynthesisVoice | null = null;
-  let speechVoices: SpeechSynthesisVoice[] = [];
-  setTimeout(() => {
-    speechVoices = synth.getVoices();
-    const speechVoiceLang = JSON.parse(
-      localStorage.getItem('alphabets_speech_voice')
-    );
-
-    if (speechVoiceLang) {
-      shouldSpeak = speechVoiceLang.enabled;
-      const foundSpeechVoice = speechVoices.find(
-        (s) => s.lang === speechVoiceLang.lang
-      );
-      if (foundSpeechVoice) {
-        speechVoice = foundSpeechVoice;
-      }
-    }
-
-    speechVoice = speechVoice || speechVoices.find((s) => s.default);
-    shouldSpeak = shouldSpeak ?? true;
-  }, 500);
-
-  function speakText(text: string) {
-    if (speechVoice && shouldSpeak) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.voice = speechVoice;
-      synth.speak(utterance);
-    }
-  }
-
-  $: {
-    if (speechVoice) {
-      localStorage.setItem(
-        'alphabets_speech_voice',
-        JSON.stringify({
-          lang: speechVoice.lang,
-          enabled: shouldSpeak,
-        })
-      );
-    }
-  }
-
   let pressedKeys = [];
-  let lastPressedKey: string;
+  // prettier-ignore
+  let allKeys = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+  let lastKey: string;
   let selectedImageColor: string;
+  let speak: { text: string } = { text: '' };
 
   onMount(() => {
     const alphabets = localStorage.getItem('alphabets_keys');
     pressedKeys = (alphabets && JSON.parse(alphabets)) || [];
-    const lastKey = localStorage.getItem('alphabets_last_key');
-    lastPressedKey = lastKey || '';
+    const savedLastKey = localStorage.getItem('alphabets_last_key');
+    lastKey = savedLastKey || '';
   });
 
-  function handleKeydown(event: KeyboardEvent) {
+  let throttleTimeoutId: any;
+  const handleKeydown = (event: KeyboardEvent) => {
     if (
+      isMobileDevice ||
       !regex.test(event.key) ||
       event.shiftKey ||
       event.ctrlKey ||
       event.metaKey ||
-      event.altKey
+      event.altKey ||
+      throttleTimeoutId
     ) {
       return;
     }
 
-    if (lastPressedKey !== event.key) {
-      lastPressedKey = event.key;
+    if (lastKey !== event.key) {
+      lastKey = event.key;
       // remove key from last location and push it in front
-      const keyIndex = pressedKeys.indexOf(lastPressedKey);
+      const keyIndex = pressedKeys.indexOf(lastKey);
       if (keyIndex > -1) {
         pressedKeys.splice(keyIndex, 1);
       }
-      pressedKeys = [lastPressedKey, ...pressedKeys];
+      pressedKeys = [lastKey, ...pressedKeys];
+      localStorage.setItem('alphabets_last_key', lastKey);
+      localStorage.setItem('alphabets_keys', JSON.stringify(pressedKeys));
     }
-    speakText(lastPressedKey);
-    localStorage.setItem('alphabets_keys', JSON.stringify(pressedKeys));
-    localStorage.setItem('alphabets_last_key', lastPressedKey);
-  }
 
-  function setKey(k: string) {
-    lastPressedKey = k;
-    speakText(lastPressedKey);
-    localStorage.setItem('alphabets_last_key', lastPressedKey);
-  }
+    speak = { text: lastKey };
 
-  function deleteKey(index: number) {
+    throttleTimeoutId = setTimeout(() => {
+      clearTimeout(throttleTimeoutId);
+      throttleTimeoutId = null;
+    }, 1000);
+  };
+
+  const selectPreviousKey = (k: string) => {
+    lastKey = k;
+    localStorage.setItem('alphabets_last_key', lastKey);
+
+    speak = { text: lastKey };
+  };
+
+  const deleteKey = (index: number) => {
     const deletedKeys = pressedKeys.splice(index, 1);
-    if (deletedKeys[0] === lastPressedKey) {
-      lastPressedKey = pressedKeys[index] || '';
+    if (deletedKeys[0] === lastKey) {
+      lastKey = pressedKeys[index] || '';
+      localStorage.setItem('alphabets_last_key', lastKey);
     }
     pressedKeys = [...pressedKeys];
-    localStorage.setItem('alphabets_last_key', lastPressedKey);
     localStorage.setItem('alphabets_keys', JSON.stringify(pressedKeys));
-  }
 
-  function reset() {
-    lastPressedKey = '';
+    speak = { text: '' };
+  };
+
+  const reset = () => {
+    lastKey = '';
     pressedKeys = [];
     localStorage.removeItem('alphabets_keys');
     localStorage.removeItem('alphabets_last_key');
-  }
+
+    speak = { text: '' };
+  };
+
+  const isMobileDevice =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -167,85 +95,55 @@
 <main>
   <h1>Let's learn characters!</h1>
 
-  <div class="flex checkboxes">
-    <legend>Background:</legend>
-    <label>
-      <input type="radio" bind:group={bodyColor} value="blue" />
-      Blue
-    </label>
-    <label>
-      <input type="radio" bind:group={bodyColor} value="orange" />
-      Orange
-    </label>
-    <label>
-      <input type="radio" bind:group={bodyColor} value="red" />
-      Red
-    </label>
-    <label>
-      <input type="radio" bind:group={bodyColor} value="green" />
-      Green
-    </label>
-  </div>
+  <BodyColor />
 
-  <div class="flex checkboxes">
-    <legend>Listen to:</legend>
-    <label>
-      <input type="checkbox" bind:checked={allowCapitalLetters} />
-      Allow Capital Letters
-    </label>
-    <label>
-      <input type="checkbox" bind:checked={allowSmallLetters} />
-      Allow Small Letters
-    </label>
-    <label>
-      <input type="checkbox" bind:checked={allowNumbers} />
-      Allow Numbers
-    </label>
-  </div>
-
-  <p>
-    Listening to <strong>{listeningTo}</strong>
-  </p>
+  {#if !isMobileDevice}
+    <KeysListener on:regex={(event) => (regex = event.detail)} />
+  {/if}
 
   <section>
-    {#if pressedKeys.length > 0}
-      <div class="flex voice">
-        <label>
-          <input type="checkbox" bind:checked={shouldSpeak} />
-          Should Speak
-        </label>
-        <select bind:value={speechVoice}>
-          {#each speechVoices as voice}
-            <option value={voice}>
-              {voice.name}
-            </option>
-          {/each}
-        </select>
+    {#if lastKey}
+      <Speech {speak} />
+      <div class="showcase flex">
+        <Char key={lastKey} color={selectedImageColor} />
+        <Img
+          key={lastKey}
+          autoRotate={true}
+          on:speak={(event) => (speak = { text: event.detail.text })}
+          on:color={(event) => (selectedImageColor = event.detail.color)}
+        />
       </div>
-      {#if lastPressedKey}
-        <div class="showcase flex">
-          <Char key={lastPressedKey} color={selectedImageColor} />
-          <Img
-            key={lastPressedKey}
-            on:speak={(event) => speakText(event.detail.text)}
-            on:color={(event) => (selectedImageColor = event.detail.color)}
-          />
-        </div>
-      {/if}
+    {:else if isMobileDevice}
+      <div class="instructions">Touch a key below to view pictures</div>
+    {:else}
+      <div class="instructions">Focus this window and press any alphabet</div>
+    {/if}
 
-      <div><strong>History:</strong></div>
+    {#if isMobileDevice}
+      <div><b>Touch a key below:</b></div>
+      <div class="history">
+        {#each allKeys as k, i}
+          <Kbd
+            key={k}
+            selected={lastKey === k}
+            canClose={false}
+            on:selectKey={() => selectPreviousKey(k)}
+            on:deleteKey={() => deleteKey(i)}
+          />
+        {/each}
+      </div>
+    {:else if pressedKeys.length > 0}
+      <div><b>History:</b></div>
       <div class="history">
         {#each pressedKeys as k, i}
           <Kbd
             key={k}
-            on:selectKey={() => setKey(k)}
+            on:selectKey={() => selectPreviousKey(k)}
             on:deleteKey={() => deleteKey(i)}
           />
         {/each}
       </div>
       <button on:click={reset}>Reset History</button>
-    {:else}
-      <div class="instructions">Focus this window and press any key</div>
     {/if}
   </section>
 
@@ -262,31 +160,21 @@
 <style>
   main {
     text-align: center;
-    padding: 1em;
     margin: 0 auto;
+    padding: 1em;
+    box-sizing: border-box;
+    width: 100%;
     min-width: 320px;
-    max-width: 1280px;
-  }
-
-  div.voice select {
-    margin-left: 1em;
-  }
-
-  div.checkboxes {
-    margin-top: 1em;
-  }
-
-  div.checkboxes label {
-    margin-left: 1em;
+    max-width: 1080px;
   }
 
   div.showcase {
-    padding: 16px 0;
-    margin-bottom: 16px;
+    padding: 1em 0;
+    margin-bottom: 1em;
   }
 
   div.history {
-    margin: 16px 0;
+    margin: 1em 0;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -295,5 +183,10 @@
   div.instructions {
     font-size: 2em;
     padding: 140px 0;
+  }
+
+  h1 {
+    margin: 0.5em 0;
+    font-size: 2em;
   }
 </style>

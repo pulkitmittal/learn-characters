@@ -85,5 +85,6 @@ surge public learn-characters.surge.sh
 ## TODO
 
 - [x] Add sounds
-- [ ] Make app responsive
-- [ ] Can we make it usable on mobile devices?
+- [x] Throttle key presses to prevent infinite sounds
+- [x] Make app responsive
+- [x] Can we make it usable on mobile devices?

@@ -1,6 +1,7 @@
 export const AllImages = [
   'a_airplane.png',
   'a_apple.png',
+  'a_avocado.png',
   'b_ball.png',
   'b_banana.png',
   'c_car.png',
@@ -20,6 +21,7 @@ export const AllImages = [
   'm_moon.png',
   'n_nose.png',
   'o_orange.png',
+  'o_owl.png',
   'p_parrot.png',
   'p_penguin.png',
   'q_queen.png',
