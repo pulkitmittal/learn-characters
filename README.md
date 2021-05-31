@@ -1,5 +1,7 @@
 # learn-characters
 
+[![LearnCharactersCI](https://github.com/pulkitmittal/learn-characters/actions/workflows/surge.yml/badge.svg?branch=master)](https://github.com/pulkitmittal/learn-characters/actions/workflows/surge.yml)
+
 This is a project created using [Svelte](https://svelte.dev).
 
 It is an application where kids can learn characters by pressing keys, looking at pictures and listening to character and words pronunciation.

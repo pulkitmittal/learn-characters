@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { isoLangs } from './helpers/iso-languages';
+  import LocalStorage from './helpers/local-storage';
   export let speak: { text: string } = { text: '' };
 
   const synth = window.speechSynthesis;
@@ -8,11 +10,10 @@
 
   setTimeout(() => {
     browserSpeechVoices = synth.getVoices();
-    const savedSpeechVoice = JSON.parse(
-      localStorage.getItem('alphabets_speech_voice')
-    );
+    const savedSpeechVoice = LocalStorage.getVoice();
 
     if (savedSpeechVoice) {
+      // set voice from localstorage
       muted = savedSpeechVoice.disabled;
       const foundSpeechVoice = browserSpeechVoices.find(
         (s) => s.lang === savedSpeechVoice.lang
@@ -20,6 +21,12 @@
       if (foundSpeechVoice) {
         selectedSpeechVoice = foundSpeechVoice;
       }
+    } else {
+      // set voice from browser locale
+      const browserLocale = navigator.language;
+      selectedSpeechVoice = browserSpeechVoices.find(
+        (s) => s.lang === browserLocale
+      );
     }
 
     selectedSpeechVoice =
@@ -28,13 +35,7 @@
   }, 500);
 
   $: if (selectedSpeechVoice) {
-    localStorage.setItem(
-      'alphabets_speech_voice',
-      JSON.stringify({
-        lang: selectedSpeechVoice.lang,
-        disabled: muted,
-      })
-    );
+    LocalStorage.saveVoice({ lang: selectedSpeechVoice.lang, muted: muted });
   }
 
   $: if (speak?.text && selectedSpeechVoice && !muted) {
@@ -54,7 +55,7 @@
     >
       {#each browserSpeechVoices as voice}
         <option value={voice}>
-          {voice.name}
+          {voice.name} - {isoLangs[voice.lang]?.name || voice.lang}
         </option>
       {/each}
     </select>

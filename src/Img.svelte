@@ -4,7 +4,7 @@
   import { createEventDispatcher } from 'svelte';
   import ColorThief from 'colorthief';
   import { tick } from 'svelte';
-  import { AllImages } from './all_images';
+  import { AllImages } from './helpers/all_images';
 
   export let key = '';
   export let autoRotate = true;

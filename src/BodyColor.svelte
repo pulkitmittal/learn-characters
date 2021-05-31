@@ -1,11 +1,13 @@
 <script lang="ts">
-  let bodyColor: any = localStorage.getItem('alphabets_body_color') || 'green';
+  import LocalStorage from './helpers/local-storage';
+
+  let bodyColor: any = LocalStorage.getBackground() || 'green';
   $: {
     document.body.classList.toggle('blue', bodyColor === 'blue');
     document.body.classList.toggle('orange', bodyColor === 'orange');
     document.body.classList.toggle('red', bodyColor === 'red');
     document.body.classList.toggle('green', bodyColor === 'green');
-    localStorage.setItem('alphabets_body_color', bodyColor);
+    LocalStorage.saveBackground(bodyColor);
   }
 </script>
 

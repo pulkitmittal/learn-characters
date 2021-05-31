@@ -2,4 +2,6 @@ node_modules
 public/build
 .img_bk
 
+.env
+
 .DS_Store
