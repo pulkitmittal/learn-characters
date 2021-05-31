@@ -39,7 +39,7 @@ jobs:
       - name: Publish to surge.sh
         uses: dswistowski/surge-sh-action@v1.0.1
         with:
-          domain: learn-characters.surge.sh
+          domain: 'learn-characters.surge.sh'
+          project: 'public'
           login: ${{ secrets.SURGE_LOGIN }}
           token: ${{ secrets.SURGE_TOKEN }}
-          project: public
