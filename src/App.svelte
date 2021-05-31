@@ -13,6 +13,6 @@
   firebase.analytics();
 </script>
 
-<FirebaseApp {firebase}>
+<FirebaseApp {firebase} analytics>
   <Main />
 </FirebaseApp>

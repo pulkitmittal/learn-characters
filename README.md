@@ -1,6 +1,7 @@
 # learn-characters
 
-[![LearnCharactersCI](https://github.com/pulkitmittal/learn-characters/actions/workflows/surge.yml/badge.svg?branch=master)](https://github.com/pulkitmittal/learn-characters/actions/workflows/surge.yml)
+[![LearnCharactersCI](https://github.com/pulkitmittal/learn-characters/actions/workflows/surge.yml/badge.svg?branch=master)](https://github.com/pulkitmittal/learn-characters/actions/workflows/surge.yml) [![MadeWithSvelte.com shield](https://madewithsvelte.com/storage/repo-shields/1893-shield.svg)](https://madewithsvelte.com/p/sveltefire/shield-link)
+
 
 This is a project created using [Svelte](https://svelte.dev).
 
