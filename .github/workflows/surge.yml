@@ -31,4 +31,4 @@ jobs:
         run: |
           SURGE_LOGIN=${{ secrets.SURGE_LOGIN }}
           SURGE_TOKEN=${{ secrets.SURGE_TOKEN }}
-          surge --project public --domain learn-characters.surge.sh
+          npm run surge -- --project public --domain learn-characters.surge.sh
