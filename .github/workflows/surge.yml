@@ -9,6 +9,7 @@ on:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    environment: test
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -29,6 +30,5 @@ jobs:
 
       - name: Publish to surge.sh
         run: |
-          SURGE_LOGIN=${{ secrets.SURGE_LOGIN }}
           SURGE_TOKEN=${{ secrets.SURGE_TOKEN }}
           npm run surge -- --project public --domain learn-characters.surge.sh
