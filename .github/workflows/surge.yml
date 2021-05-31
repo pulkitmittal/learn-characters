@@ -29,8 +29,4 @@ jobs:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
 
       - name: Publish to surge.sh
-        run: |
-          npm run surge -- 
-          --project public
-          --domain learn-characters.surge.sh
-          --token ${{ secrets.SURGE_TOKEN }}
+        run: npm run surge -- --project public --domain learn-characters.surge.sh --token ${{ secrets.SURGE_TOKEN }}
