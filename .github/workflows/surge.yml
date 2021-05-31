@@ -30,5 +30,7 @@ jobs:
 
       - name: Publish to surge.sh
         run: |
-          SURGE_TOKEN=${{ secrets.SURGE_TOKEN }}
-          npm run surge -- --project public --domain learn-characters.surge.sh
+          npm run surge -- 
+          --project public
+          --domain learn-characters.surge.sh
+          --token ${{ secrets.SURGE_TOKEN }}
