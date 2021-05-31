@@ -29,7 +29,7 @@ jobs:
           run_install: true
 
       - name: Install dependencies
-        uses: pnpm i
+        run: pnpm i
 
       - name: Build app
         run: npm run build
