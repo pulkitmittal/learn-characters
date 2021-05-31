@@ -153,6 +153,8 @@
     >
       Github
     </a>
+    |
+    <span>Version: {process.env.APP_VERSION}</span>
   </p>
 </main>
 

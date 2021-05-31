@@ -8,6 +8,9 @@ import typescript from '@rollup/plugin-typescript';
 import css from 'rollup-plugin-css-only';
 import replace from '@rollup/plugin-replace';
 import dotenv from 'dotenv';
+import { version } from './package.json';
+
+console.log(`running version ${version}`);
 
 dotenv.config();
 
@@ -50,6 +53,7 @@ export default {
     replace({
       values: {
         'process.env.FIREBASE_CONFIG': `"${process.env.FIREBASE_CONFIG}"`,
+        'process.env.APP_VERSION': JSON.stringify(version),
       },
       preventAssignment: true,
     }),
