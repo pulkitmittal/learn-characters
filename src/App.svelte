@@ -9,8 +9,6 @@
   const config = decodeURIComponent(process.env.FIREBASE_CONFIG);
   const firebaseConfig = JSON.parse(config);
 
-  console.log(firebaseConfig);
-
   firebase.initializeApp(firebaseConfig);
   firebase.analytics();
 </script>
