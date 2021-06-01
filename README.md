@@ -6,6 +6,7 @@
 This is a project created using [Svelte](https://svelte.dev).
 
 It is an application where kids can learn characters by pressing keys, looking at pictures and listening to character and words pronunciation.
+[Try it out.](http://learn-characters.surge.sh/)
 
 ## Get started
 
@@ -55,21 +56,6 @@ If you're building a single-page app (SPA) with multiple routes, sirv needs to b
 
 ## Deploying to the web
 
-### With [Vercel](https://vercel.com)
-
-Install `vercel` if you haven't already:
-
-```bash
-npm install -g vercel
-```
-
-Then, from within your project folder:
-
-```bash
-cd public
-vercel deploy --name my-project
-```
-
 ### With [surge](https://surge.sh/)
 
 Install `surge` if you haven't already:
@@ -82,7 +68,7 @@ Then, from within your project folder:
 
 ```bash
 npm run build
-surge public learn-characters.surge.sh
+surge --project public --domain learn-characters.surge.sh --token <SURGE_TOKEN>
 ```
 
 ## TODO
